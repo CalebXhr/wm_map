@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>员工位置地图标注系统</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- 自定义样式 -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>员工位置地图标注系统</h1>
+            <p>可视化展示员工居住地点和工作地点</p>
+        </header>
+        
+        <div class="map-controls">
+            <div class="controls-row">
+                <button id="toggleView" class="btn">切换视图</button>
+                <button id="showAll" class="btn">显示所有标记</button>
+                <select id="filterDepartment" class="filter-select">
+                    <option value="all">所有部门</option>
+                    <option value="技术部">技术部</option>
+                    <option value="市场部">市场部</option>
+                    <option value="行政部">行政部</option>
+                    <option value="财务部">财务部</option>
+                </select>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索员工姓名..." />
+                <button id="searchBtn" class="btn search-btn">搜索</button>
+            </div>
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="info-panel">
+                <h3>员工信息</h3>
+                <div id="employeeInfo" class="employee-info-content">
+                    <p>点击地图上的标记查看详细信息</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="data-panel">
+            <h3>数据管理</h3>
+            <button id="importData" class="btn">导入员工数据</button>
+            <button id="exportData" class="btn">导出数据</button>
+            <input type="file" id="fileInput" accept=".csv,.xlsx" style="display: none;" />
+            <p class="hint-text">支持CSV或Excel格式的数据导入</p>
+        </div>
+    </div>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- 自定义脚本 -->
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
