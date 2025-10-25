@@ -129,13 +129,9 @@ function removeAllPolylines() {
 
 // 切换视图
 function toggleView() {
-    currentView = currentView === 'both' ? 'residence' : 
-                  currentView === 'residence' ? 'workplace' : 'both';
+    currentView = toggleViewBtn.value;
     
     updateMarkersVisibility();
-    
-    // 更新按钮文本
-    toggleViewBtn.textContent = getViewButtonText();
     
     // 添加提示信息
     let message = '';
@@ -152,18 +148,6 @@ function toggleView() {
     
     // 显示临时提示
     showTemporaryMessage(message);
-}
-
-// 获取视图按钮文本
-function getViewButtonText() {
-    switch (currentView) {
-        case 'residence':
-            return '切换到：只显示工作地点';
-        case 'workplace':
-            return '切换到：显示所有地点';
-        default:
-            return '切换到：只显示居住地点';
-    }
 }
 
 // 显示临时消息提示
@@ -289,8 +273,8 @@ function showAllMarkers() {
 
 // 绑定事件监听器
 function bindEventListeners() {
-    // 切换视图按钮
-    toggleViewBtn.addEventListener('click', toggleView);
+    // 切换视图下拉列表
+    toggleViewBtn.addEventListener('change', toggleView);
     
     // 显示所有标记按钮
     showAllBtn.addEventListener('click', showAllMarkers);

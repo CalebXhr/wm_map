@@ -18,7 +18,11 @@
         
         <div class="map-controls">
             <div class="controls-row">
-                <button id="toggleView" class="btn">切换视图</button>
+                <select id="toggleView" class="view-select">
+                    <option value="both">显示所有地点</option>
+                    <option value="residence">只显示居住地点</option>
+                    <option value="workplace">只显示工作地点</option>
+                </select>
                 <button id="showAll" class="btn">显示所有标记</button>
                 <select id="filterDepartment" class="filter-select">
                     <option value="all">所有部门</option>
