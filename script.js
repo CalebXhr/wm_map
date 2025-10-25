@@ -136,18 +136,70 @@ function toggleView() {
     
     // 更新按钮文本
     toggleViewBtn.textContent = getViewButtonText();
+    
+    // 添加提示信息
+    let message = '';
+    switch (currentView) {
+        case 'residence':
+            message = '当前只显示员工居住地点';
+            break;
+        case 'workplace':
+            message = '当前只显示员工工作地点';
+            break;
+        default:
+            message = '当前显示所有员工地点（居住和工作）';
+    }
+    
+    // 显示临时提示
+    showTemporaryMessage(message);
 }
 
 // 获取视图按钮文本
 function getViewButtonText() {
     switch (currentView) {
         case 'residence':
-            return '显示工作地点';
+            return '切换到：只显示工作地点';
         case 'workplace':
-            return '显示所有地点';
+            return '切换到：显示所有地点';
         default:
-            return '只显示居住地';
+            return '切换到：只显示居住地点';
     }
+}
+
+// 显示临时消息提示
+function showTemporaryMessage(message) {
+    // 创建消息元素
+    let messageEl = document.createElement('div');
+    messageEl.className = 'message-toast';
+    messageEl.textContent = message;
+    messageEl.style.position = 'fixed';
+    messageEl.style.bottom = '20px';
+    messageEl.style.left = '50%';
+    messageEl.style.transform = 'translateX(-50%)';
+    messageEl.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    messageEl.style.color = 'white';
+    messageEl.style.padding = '12px 24px';
+    messageEl.style.borderRadius = '8px';
+    messageEl.style.zIndex = '10000';
+    messageEl.style.fontSize = '14px';
+    messageEl.style.opacity = '0';
+    messageEl.style.transition = 'opacity 0.3s ease';
+    
+    // 添加到文档
+    document.body.appendChild(messageEl);
+    
+    // 显示消息
+    setTimeout(() => {
+        messageEl.style.opacity = '1';
+    }, 10);
+    
+    // 2秒后隐藏并移除
+    setTimeout(() => {
+        messageEl.style.opacity = '0';
+        setTimeout(() => {
+            document.body.removeChild(messageEl);
+        }, 300);
+    }, 2000);
 }
 
 // 更新标记可见性

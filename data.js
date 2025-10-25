@@ -13,7 +13,7 @@ window.employeeData = [
             lng: 116.3413
         },
         workplace: {
-            name: "公司",
+            name: "总部办公室",
             address: "北京市朝阳区建国路88号",
             lat: 39.9087,
             lng: 116.4660
@@ -32,10 +32,10 @@ window.employeeData = [
             lng: 116.2865
         },
         workplace: {
-            name: "公司",
-            address: "北京市朝阳区建国路88号",
-            lat: 39.9087,
-            lng: 116.4660
+            name: "市场中心",
+            address: "北京市海淀区中关村大街1号",
+            lat: 39.9834,
+            lng: 116.3074
         },
         joinDate: "2021-08-20"
     },
@@ -51,10 +51,10 @@ window.employeeData = [
             lng: 116.3662
         },
         workplace: {
-            name: "公司",
-            address: "北京市朝阳区建国路88号",
-            lat: 39.9087,
-            lng: 116.4660
+            name: "研发中心",
+            address: "北京市海淀区科学院南路2号",
+            lat: 39.9812,
+            lng: 116.3131
         },
         joinDate: "2022-03-10"
     },
@@ -70,7 +70,7 @@ window.employeeData = [
             lng: 116.4482
         },
         workplace: {
-            name: "公司",
+            name: "总部办公室",
             address: "北京市朝阳区建国路88号",
             lat: 39.9087,
             lng: 116.4660
@@ -89,10 +89,10 @@ window.employeeData = [
             lng: 116.3349
         },
         workplace: {
-            name: "公司",
-            address: "北京市朝阳区建国路88号",
-            lat: 39.9087,
-            lng: 116.4660
+            name: "财务中心",
+            address: "北京市西城区金融大街35号",
+            lat: 39.9075,
+            lng: 116.3586
         },
         joinDate: "2022-02-28"
     },
@@ -108,10 +108,10 @@ window.employeeData = [
             lng: 116.6561
         },
         workplace: {
-            name: "公司",
-            address: "北京市朝阳区建国路88号",
-            lat: 39.9087,
-            lng: 116.4660
+            name: "创意设计中心",
+            address: "北京市朝阳区酒仙桥路4号",
+            lat: 39.9800,
+            lng: 116.4727
         },
         joinDate: "2022-05-15"
     },
@@ -127,10 +127,10 @@ window.employeeData = [
             lng: 116.1871
         },
         workplace: {
-            name: "公司",
-            address: "北京市朝阳区建国路88号",
-            lat: 39.9087,
-            lng: 116.4660
+            name: "市场中心",
+            address: "北京市海淀区中关村大街1号",
+            lat: 39.9834,
+            lng: 116.3074
         },
         joinDate: "2021-07-10"
     },
@@ -146,10 +146,10 @@ window.employeeData = [
             lng: 116.3282
         },
         workplace: {
-            name: "公司",
-            address: "北京市朝阳区建国路88号",
-            lat: 39.9087,
-            lng: 116.4660
+            name: "产品中心",
+            address: "北京市朝阳区望京SOHO T1",
+            lat: 39.9952,
+            lng: 116.4822
         },
         joinDate: "2022-04-01"
     }
