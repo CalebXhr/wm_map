@@ -321,7 +321,44 @@ function handleFileImport(event) {
 
 // 导出数据
 function exportData() {
-    alert('数据导出功能开发中。');
+    // 准备CSV数据
+    let csvContent = 'ID,姓名,部门,职位,居住地地址,居住地纬度,居住地经度,工作地地址,工作地纬度,工作地经度,入职日期\n';
+    
+    // 将员工数据转换为CSV格式
+    employeeData.forEach(employee => {
+        const row = [
+            employee.id,
+            `"${employee.name}"`,
+            `"${employee.department}"`,
+            `"${employee.position}"`,
+            `"${employee.residence.address}"`,
+            employee.residence.lat,
+            employee.residence.lng,
+            `"${employee.workplace.address}"`,
+            employee.workplace.lat,
+            employee.workplace.lng,
+            employee.joinDate
+        ];
+        csvContent += row.join(',') + '\n';
+    });
+    
+    // 创建Blob对象
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    
+    // 创建下载链接
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `员工数据_${new Date().toLocaleDateString()}.csv`);
+    link.style.visibility = 'hidden';
+    
+    // 添加到DOM并触发下载
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // 释放URL对象
+    URL.revokeObjectURL(url);
 }
 
 // 初始化应用
