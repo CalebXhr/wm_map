@@ -313,10 +313,147 @@ function handleFileImport(event) {
     const file = event.target.files[0];
     if (!file) return;
     
-    alert('数据导入功能开发中，当前版本使用示例数据。');
+    // 检查文件类型
+    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+        alert('请上传CSV格式的文件！');
+        event.target.value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        try {
+            const csvContent = e.target.result;
+            const parsedData = parseCSVData(csvContent);
+            
+            if (parsedData.length === 0) {
+                alert('未导入任何员工数据，请检查文件格式是否正确！');
+                return;
+            }
+            
+            // 更新全局员工数据
+            window.employeeData = parsedData;
+            
+            // 清除现有标记并重新初始化
+            clearAllMarkers();
+            initMarkers();
+            applyFilters();
+            
+            alert(`成功导入 ${parsedData.length} 条员工数据！`);
+        } catch (error) {
+            console.error('导入数据时出错:', error);
+            alert('导入失败，请检查文件格式是否正确！错误信息：' + error.message);
+        }
+    };
+    
+    reader.onerror = function() {
+        alert('读取文件失败，请重试！');
+    };
+    
+    // 读取文件内容
+    reader.readAsText(file, 'UTF-8');
     
     // 重置文件输入
     event.target.value = '';
+}
+
+// 解析CSV数据
+function parseCSVData(csvContent) {
+    const lines = csvContent.split('\n');
+    const result = [];
+    
+    if (lines.length < 2) {
+        throw new Error('CSV文件内容太少');
+    }
+    
+    // 获取标题行并标准化（去除空格和引号）
+    const headers = lines[0].split(',').map(h => 
+        h.replace(/^"|"$/g, '').trim().toLowerCase()
+    );
+    
+    // 检查必要的字段
+    const requiredFields = ['id', '姓名', '部门', '职位'];
+    const hasRequiredFields = requiredFields.some(field => 
+        headers.some(header => header.includes(field))
+    );
+    
+    if (!hasRequiredFields) {
+        throw new Error('CSV文件缺少必要的字段，请确保包含ID、姓名、部门、职位等信息');
+    }
+    
+    // 处理数据行
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        // 使用正则表达式正确解析CSV行，处理引号内的逗号
+        const row = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let j = 0; j < line.length; j++) {
+            const char = line[j];
+            
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                row.push(current.trim());
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        row.push(current.trim());
+        
+        // 创建员工对象
+        const employee = {
+            id: parseInt(row[0]) || Date.now() + i, // 如果ID无效，使用时间戳+索引
+            name: row[1] || '未知',
+            department: row[2] || '未分类',
+            position: row[3] || '未知',
+            residence: {
+                name: '家',
+                address: row[4] || '未知地址',
+                lat: parseFloat(row[5]) || 39.9042, // 默认北京坐标
+                lng: parseFloat(row[6]) || 116.4074
+            },
+            workplace: {
+                name: '公司',
+                address: row[7] || '未知地址',
+                lat: parseFloat(row[8]) || 39.9042,
+                lng: parseFloat(row[9]) || 116.4074
+            },
+            joinDate: row[10] || new Date().toISOString().split('T')[0]
+        };
+        
+        // 验证必要字段
+        if (!employee.name || !employee.department) {
+            console.warn('跳过无效行:', row);
+            continue;
+        }
+        
+        result.push(employee);
+    }
+    
+    return result;
+}
+
+// 清除所有标记
+function clearAllMarkers() {
+    // 清除居住地点标记
+    residenceMarkers.forEach(marker => map.removeLayer(marker));
+    residenceMarkers = [];
+    
+    // 清除工作地点标记
+    workplaceMarkers.forEach(marker => map.removeLayer(marker));
+    workplaceMarkers = [];
+    
+    // 清空所有标记数组
+    allMarkers = [];
+    
+    // 移除所有连线
+    removeAllPolylines();
 }
 
 // 导出数据
