@@ -6,6 +6,7 @@ let residenceMarkers = [];
 let workplaceMarkers = [];
 let currentView = 'both'; // 'residence', 'workplace', 'both'
 let allMarkers = [];
+let geocodeCache = new Map(); // 地理编码缓存，避免重复调用API
 
 // DOM 元素
 const toggleViewBtn = document.getElementById('toggleView');
@@ -322,14 +323,42 @@ function handleFileImport(event) {
     
     const reader = new FileReader();
     
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
         try {
             const csvContent = e.target.result;
-            const parsedData = parseCSVData(csvContent);
+            let parsedData = parseCSVData(csvContent);
             
             if (parsedData.length === 0) {
                 alert('未导入任何员工数据，请检查文件格式是否正确！');
                 return;
+            }
+            
+            // 显示处理中的提示
+            const message = `正在处理 ${parsedData.length} 条数据，可能需要一些时间...`;
+            showTemporaryMessage(message);
+            
+            // 为缺少坐标的数据进行地理编码
+            for (let i = 0; i < parsedData.length; i++) {
+                const employee = parsedData[i];
+                
+                // 为居住地进行地理编码（如果没有坐标）
+                if (!employee.residence.lat || !employee.residence.lng) {
+                    const location = await geocodeAddress(employee.residence.address);
+                    employee.residence.lat = location.lat;
+                    employee.residence.lng = location.lng;
+                }
+                
+                // 为工作地进行地理编码（如果没有坐标）
+                if (!employee.workplace.lat || !employee.workplace.lng) {
+                    const location = await geocodeAddress(employee.workplace.address);
+                    employee.workplace.lat = location.lat;
+                    employee.workplace.lng = location.lng;
+                }
+                
+                // 添加短暂延迟避免触发Nominatim的速率限制
+                if (i < parsedData.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // 1秒延迟
+                }
             }
             
             // 更新全局员工数据
@@ -356,6 +385,62 @@ function handleFileImport(event) {
     
     // 重置文件输入
     event.target.value = '';
+}
+
+// 使用Nominatim API进行地理编码（地址转经纬度）
+async function geocodeAddress(address) {
+    // 检查缓存
+    if (geocodeCache.has(address)) {
+        console.log('使用缓存的地理编码结果:', address);
+        return geocodeCache.get(address);
+    }
+    
+    // 处理空地址
+    if (!address || address === '未知地址') {
+        return { lat: 39.9042, lng: 116.4074 }; // 返回默认北京坐标
+    }
+    
+    try {
+        // 编码地址
+        const encodedAddress = encodeURIComponent(address);
+        
+        // Nominatim API请求URL
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=1&accept-language=zh-CN`;
+        
+        console.log('正在请求地理编码:', address);
+        
+        // 发送请求，设置User-Agent以符合Nominatim使用政策
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'wm_map_app/1.0 (employee map application)'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`地理编码请求失败: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+            const location = {
+                lat: parseFloat(data[0].lat),
+                lng: parseFloat(data[0].lon)
+            };
+            
+            // 存入缓存
+            geocodeCache.set(address, location);
+            
+            console.log('地理编码成功:', address, location);
+            return location;
+        } else {
+            console.warn('未找到地址:', address);
+            return { lat: 39.9042, lng: 116.4074 }; // 返回默认北京坐标
+        }
+    } catch (error) {
+        console.error('地理编码出错:', error);
+        return { lat: 39.9042, lng: 116.4074 }; // 出错时返回默认坐标
+    }
 }
 
 // 解析CSV数据
@@ -415,14 +500,16 @@ function parseCSVData(csvContent) {
             residence: {
                 name: '家',
                 address: row[4] || '未知地址',
-                lat: parseFloat(row[5]) || 39.9042, // 默认北京坐标
-                lng: parseFloat(row[6]) || 116.4074
+                // 优先使用CSV中的坐标，如果没有则会通过地理编码获取
+                lat: parseFloat(row[5]) || null,
+                lng: parseFloat(row[6]) || null
             },
             workplace: {
                 name: '公司',
                 address: row[7] || '未知地址',
-                lat: parseFloat(row[8]) || 39.9042,
-                lng: parseFloat(row[9]) || 116.4074
+                // 优先使用CSV中的坐标，如果没有则会通过地理编码获取
+                lat: parseFloat(row[8]) || null,
+                lng: parseFloat(row[9]) || null
             },
             joinDate: row[10] || new Date().toISOString().split('T')[0]
         };

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地址转经纬度测试工具</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .test-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 0;
+            font-size: 18px;
+            border-left: 4px solid #3498db;
+            padding-left: 10px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.2);
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button.secondary {
+            background-color: #2ecc71;
+        }
+        button.secondary:hover {
+            background-color: #27ae60;
+        }
+        .result-container {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 120px;
+            background-color: #fafafa;
+        }
+        .result-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+        .error {
+            background-color: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        .label {
+            font-weight: bold;
+            color: #555;
+            min-width: 80px;
+            display: inline-block;
+        }
+        .example-addresses {
+            background-color: #f0f7ff;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border-left: 4px solid #1976d2;
+        }
+        .example-addresses h4 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        .example-addresses ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .example-addresses li {
+            margin: 5px 0;
+            cursor: pointer;
+            color: #1976d2;
+        }
+        .example-addresses li:hover {
+            text-decoration: underline;
+        }
+        .cache-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .clear-cache {
+            background-color: #f39c12;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        .clear-cache:hover {
+            background-color: #e67e22;
+        }
+    </style>
+</head>
+<body>
+    <h1>地址转经纬度测试工具</h1>
+    
+    <div class="test-container">
+        <h2>单个地址测试</h2>
+        
+        <div class="example-addresses">
+            <h4>示例地址（点击使用）:</h4>
+            <ul>
+                <li onclick="document.getElementById('single-address').value = this.textContent">北京市海淀区中关村大街1号</li>
+                <li onclick="document.getElementById('single-address').value = this.textContent">上海市浦东新区世纪大道1号</li>
+                <li onclick="document.getElementById('single-address').value = this.textContent">广州市天河区天河路385号</li>
+                <li onclick="document.getElementById('single-address').value = this.textContent">深圳市南山区科技园</li>
+            </ul>
+        </div>
+        
+        <input type="text" id="single-address" placeholder="请输入地址" />
+        <button onclick="testSingleAddress()">转换地址</button>
+        <button class="clear-cache" onclick="clearCache()">清除缓存</button>
+        <div class="cache-info" id="cache-info">缓存中地址数量: 0</div>
+        
+        <div class="result-container" id="single-result">
+            结果将显示在这里...
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h2>批量地址测试</h2>
+        <p>请输入多个地址，每行一个。系统会自动按顺序转换每个地址（间隔1秒，避免触发API限制）。</p>
+        
+        <textarea id="batch-addresses" placeholder="请输入多个地址，每行一个..."></textarea>
+        <button class="secondary" onclick="fillExampleBatch()">填充示例地址</button>
+        <button onclick="testBatchAddresses()">批量转换</button>
+        
+        <div class="result-container" id="batch-result">
+            批量结果将显示在这里...
+        </div>
+    </div>
+    
+    <script src="geocode_test.js"></script>
+    <script>
+        // 更新缓存信息显示
+        function updateCacheInfo() {
+            const cacheSize = geocodeCache ? geocodeCache.size : 0;
+            document.getElementById('cache-info').textContent = `缓存中地址数量: ${cacheSize}`;
+        }
+        
+        // 清除缓存
+        function clearCache() {
+            if (geocodeCache) {
+                geocodeCache.clear();
+                alert('缓存已清除');
+                updateCacheInfo();
+            }
+        }
+        
+        // 单个地址测试
+        async function testSingleAddress() {
+            const address = document.getElementById('single-address').value;
+            const resultDiv = document.getElementById('single-result');
+            
+            if (!address.trim()) {
+                resultDiv.innerHTML = '<div class="error">请输入有效的地址</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="loading">正在转换地址...请稍候</div>';
+            
+            try {
+                const result = await addressToCoordinates(address);
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <p><span class="label">原始地址:</span> ${address}</p>
+                        <p><span class="label">规范化地址:</span> ${result.address}</p>
+                        <p><span class="label">纬度 (lat):</span> ${result.lat}</p>
+                        <p><span class="label">经度 (lng):</span> ${result.lng}</p>
+                        <p><span class="label">坐标对:</span> [${result.lat}, ${result.lng}]</p>
+                    </div>
+                `;
+                
+                updateCacheInfo();
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <p><span class="label">错误:</span> ${error.message}</p>
+                        <p>请检查地址格式或网络连接</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // 批量地址测试
+        async function testBatchAddresses() {
+            const addressesText = document.getElementById('batch-addresses').value;
+            const resultDiv = document.getElementById('batch-result');
+            
+            if (!addressesText.trim()) {
+                resultDiv.innerHTML = '<div class="error">请输入要转换的地址</div>';
+                return;
+            }
+            
+            const addresses = addressesText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line !== '');
+            
+            if (addresses.length === 0) {
+                resultDiv.innerHTML = '<div class="error">没有有效的地址</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = `<div class="loading">正在处理 ${addresses.length} 个地址...<br>这可能需要一些时间，请耐心等待...</div>`;
+            
+            try {
+                const results = await batchAddressToCoordinates(addresses);
+                
+                // 统计结果
+                const successCount = results.filter(r => r.success).length;
+                const errorCount = results.length - successCount;
+                
+                let html = `
+                    <h3>批量转换结果</h3>
+                    <p>总地址数: ${results.length} | 成功: ${successCount} | 失败: ${errorCount}</p>
+                    <hr>
+                `;
+                
+                // 显示每个地址的结果
+                results.forEach((result, index) => {
+                    if (result.success) {
+                        html += `
+                            <div class="result-item success">
+                                <p><strong>地址 ${index + 1}:</strong> ${result.address}</p>
+                                <p><span class="label">纬度:</span> ${result.coordinates.lat}</p>
+                                <p><span class="label">经度:</span> ${result.coordinates.lng}</p>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="result-item error">
+                                <p><strong>地址 ${index + 1}:</strong> ${result.address}</p>
+                                <p><span class="label">错误:</span> ${result.error}</p>
+                            </div>
+                        `;
+                    }
+                });
+                
+                resultDiv.innerHTML = html;
+                updateCacheInfo();
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <p><span class="label">批量处理错误:</span> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // 填充示例批量地址
+        function fillExampleBatch() {
+            const exampleAddresses = [
+                '北京市朝阳区望京SOHO',
+                '上海市静安区南京西路',
+                '广州市天河区珠江新城',
+                '深圳市南山区腾讯滨海大厦',
+                '杭州市西湖区文三路',
+                '成都市锦江区春熙路',
+                '武汉市江汉区江汉路',
+                '西安市雁塔区大雁塔'
+            ];
+            
+            document.getElementById('batch-addresses').value = exampleAddresses.join('\n');
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCacheInfo();
+            
+            // 添加回车键支持
+            document.getElementById('single-address').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    testSingleAddress();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
